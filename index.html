@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>星云链许愿墙</title>
+<link rel="stylesheet" href="css/index.css" />
+<script type="text/javascript" src='js/jquery-1.7.2.min.js'></script>
+<script type="text/javascript" src='js/index.js'></script>
+<script type="text/javascript" src='js/nebPay.js'></script>
+<script type="text/javascript" src='js/nebulas.js'></script>
+</head>
+<body>
+	<div class="noExtension" id="noExtension" align="right" style="margin-top: 3px;font-size: 12px;margin-right: 15px;">
+	  <div>注意：请使用谷歌浏览器、并且安装钱包插件<a target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">WebExtensionWallet</a></div>
+	</div>
+	<div class="remark" id="remark" align="center" style="margin-top: 3px;font-size: 12px;">
+	  <div>本产品是一款基于星云公链的祝福、许愿墙，每一份美好的祝福与愿望，都会被永久的记录，祝您梦想成真！</div>
+	  <div>作者：猫哥</div>
+	  <div>微信号：zhengpeng0725</div>
+	</div>	
+	<div id='top' class='top' >
+		<span id='send'></span>  
+	</div>
+
+	<div id='main'> 
+	</div>
+
+	<div id='send-form'>
+		<p class='title'><span>许下你的愿望</span></p>
+		<form action="" name='wish'>
+			<p>
+				<label for="username">昵称：</label>
+				<input type="text" name='username' id='username'/>
+			</p>
+			<p>
+				<label for="content">愿望：</label>
+				<textarea name="content" id='content'></textarea>
+			</p>
+			<span id='send-btn'></span>
+		</form>
+	</div>
+<!--[if IE 6]>
+<script type="text/javascript" src="js/iepng.js"></script>
+<script type="text/javascript">
+DD_belatedPNG.fix('#send,#close,.close');
+</script>
+<![endif]-->
+
+<script>
+     var NebPay = require("nebpay");
+     var nebPay = new NebPay();
+     var dappAddress = "n1qmHsna6EsdXqfrcRfvzEG6vdKCFibpeNC";
+
+	// $("#top").click(function(){
+        var to = dappAddress;
+        var value = "0";
+        var callFunction = "forEach";
+		var callArgs = "[\"" + 1024 + "\",\"" + 0 + "\"]"
+        nebPay.simulateCall(to, value, callFunction, callArgs, {
+            listener: cbSearch      //指定回调函数
+        });
+   // })
+
+    //return of search,
+    function cbSearch(resp) {
+        var result = resp.result
+        console.log("return of rpc call: " + JSON.stringify(result))
+
+        if (result === 'null'){
+        	console.log("the wish is null!")
+        } else{
+            try{
+                result = JSON.parse(result)
+		console.log(result)
+            }catch (err){
+            	console.log("result parse Json is error!")//result is the error message
+            }
+            if (!!result.key){      //"return value"
+                $("#username").text(result.value)
+                $("#content").text(result.value)
+            } else {        //"error message"
+            	var strHtml = '';
+            	for(var i=0;i<result.length;i++){
+				var temp = result[i].split("|")
+				console.log(temp)
+            		strHtml += "<dl class='paper a1'><dt><span class='username'>"+temp[0]+"</span></dt><dd class='content'>"+
+            				temp[1]+"</dd><dd class='bottom'><a href='' class='close'></a></dd></dl>";
+            	}
+            	$("#main").html('');
+            	$("#main").append(strHtml);
+            	
+            	$(function () {
+
+            		$( '#main' ).height( $( window ).height() - $( '#top' ).height() - 45);
+
+            		var paper = $( '.paper' );
+            		var FW = $( window ).width();
+            		var FH = $( '#main' ).height();
+            		for (var i = 0; i < paper.length; i++) {
+            			var obj = paper.eq(i);
+            			obj.css( {
+            				left : parseInt(Math.random() * (FW - obj.width())) + 'px',
+            				top : parseInt(Math.random() * (FH - obj.height())) + 'px'
+            			} );
+            			drag(obj, $( 'dt', obj ));
+            		}
+
+            		paper.click( function () {
+            			$( this ).css( 'z-index', 1 ).siblings().css( 'z-index', 0 );
+            		} );
+
+            		$( '.close' ).click( function () {
+            			$( this ).parents( 'dl' ).fadeOut('slow');
+            			return false;
+            		} );
+
+            		$( '#send' ).click( function () {
+            			$( '<div id="windowBG"></div>' ).css( {
+            				width : $(document).width(),
+            	 			height : $(document).height(),
+            	 			position : 'absolute',
+            	 			top : 0,
+            	 			left : 0,
+            	 			zIndex : 998,
+            	 			opacity : 0.3,
+            	 			filter : 'Alpha(Opacity = 30)',
+            	 			backgroundColor : '#000000'
+            			} ).appendTo( 'body' );
+
+            			var obj = $( '#send-form' );
+            			obj.css( {
+            				left : ( $( window ).width() - obj.width() ) / 2,
+            				top : $( document ).scrollTop() + ( $( window ).height() - obj.height() ) / 2
+            			} ).fadeIn();
+            			
+            		} );
+
+            		$( '#close' ).click( function () {
+            			$( '#send-form' ).fadeOut( 'slow', function () {
+            				$( '#windowBG' ).remove();
+            			} );
+            			return false;
+            		} );
+            		
+
+            		$( '#phiz img' ).click( function () {
+            			var phiz = '[' + $( this ).attr('alt') + ']';
+            			var obj = $( 'textarea[name=content]' );
+            			obj.val(obj.val() + phiz);
+            		} );
+
+            	});
+
+            	/**
+            	* 元素拖拽
+            	* @param  obj		拖拽的对象
+            	* @param  element 	触发拖拽的对象
+            	*/
+            	function drag (obj, element) {
+            		var DX, DY, moving;
+
+            		element.mousedown(function (event) {
+            			obj.css( {
+            				zIndex : 1,
+            				opacity : 0.5,
+            	 			filter : 'Alpha(Opacity = 50)'
+            			} );
+
+            			DX = event.pageX - parseInt(obj.css('left'));	//鼠标距离事件源宽度
+            			DY = event.pageY - parseInt(obj.css('top'));	//鼠标距离事件源高度
+
+            			moving = true;	//记录拖拽状态
+            		});
+
+            		$(document).mousemove(function (event) {
+            			if (!moving) return;
+
+            			var OX = event.pageX, OY = event.pageY;	//移动时鼠标当前 X、Y 位置
+            			var	OW = obj.outerWidth(), OH = obj.outerHeight();	//拖拽对象宽、高
+            			var DW = $(window).width(), DH = $(window).height();  //页面宽、高
+
+            			var left, top;	//计算定位宽、高
+
+            			left = OX - DX < 0 ? 0 : OX - DX > DW - OW ? DW - OW : OX - DX;
+            			top = OY - DY < 0 ? 0 : OY - DY > DH - OH ? DH - OH : OY - DY;
+
+            			obj.css({
+            				'left' : left + 'px',
+            				'top' : top + 'px'
+            			});
+
+            		}).mouseup(function () {
+            			moving = false;	//鼠标抬起消取拖拽状态
+
+            			obj.css( {
+            				opacity : 1,
+            	 			filter : 'Alpha(Opacity = 100)'
+            			} );
+
+            		});
+            	}
+            }
+        }
+    }
+
+    $("#send-btn").click(function() {
+    	if($("#username").val() == null || $("#username").val() == ''){
+    		return ;
+    	}
+    	if($("#content").val() == null || $("#content").val() == ''){
+    		return ;
+    	}
+        var to = dappAddress;
+        var value = "0";
+        var callFunction = "save"
+        var callArgs = "[\"" + $("#username").val() + "\",\"" + $("#content").val() + "\"]"
+	    $( '#send-form' ).fadeOut( 'slow', function () {
+                        $( '#windowBG' ).remove();
+                } );
+        nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
+            listener: cbPush
+        });
+    });
+
+    function cbPush(resp) {
+        console.log("response of push: " + resp)
+    }
+
+</script>
+</body>
+</html>
