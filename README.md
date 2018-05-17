@@ -1,7 +1,7 @@
 # Nas-Wish
-星云链许愿墙
+Nas-wish
 
-Ps、每次刷新页面都会查询一次愿望墙
+Ps、Every time the page is refreshed, a desire wall will be queried
 
 
 
